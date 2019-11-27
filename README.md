@@ -1,6 +1,8 @@
-# GRUPO1 - Se corrigieron los bugs reportados en la devolucion del dia Sabado 23/11.
+# GRUPO1 
+# Ultima modificacion del 27-11-2019
+Se corregieron algunos aspectos esteticos de mensajes y validaciones de negocio.
 
-# Ultima modificacion 25-11-2019, se controla que todos los productos del pedido tengan stock, caso contrario el pedido no se procesa
+# Modificacion 25-11-2019, se controla que todos los productos del pedido tengan stock, caso contrario el pedido no se procesa
 Tampoco se elimina, solo que se "saltea", de forma tal que si se procesa otro lote de produccion que aumenta el stock en el siguiente envio a logistica se vuelve a procesar. Como los pedidos tienen orden cronologico se va a procesar primero.
 
 ***NUEVA FUNCIONALIDAD***
