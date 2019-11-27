@@ -1,4 +1,6 @@
-﻿using System;
+﻿// v9.2 27/11 9PM
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -154,20 +156,27 @@ namespace GRUPO1
                             Devoluc.CodigoReferencia = lineasplit[0];
                             Devoluc.Entregado = entrego;
 
-
-                            if (!ListaDevolucionesHistorica.Contains(Devoluc.CodigoReferencia))
+                            if (VerificaDevolucion(Devoluc.CodigoReferencia))
                             {
-                                ListaDevoluciones.Add(Devoluc);
-                                ListaDevolucionesHistorica.Add(Devoluc.CodigoReferencia);
-                                using (StreamWriter sw = File.AppendText(rutadevolucionesprocesadas))
+                                if (!ListaDevolucionesHistorica.Contains(Devoluc.CodigoReferencia))
                                 {
-                                    sw.Write(Devoluc.CodigoReferencia + "\r\n");
-                                }
 
+                                    ListaDevoluciones.Add(Devoluc);
+                                    ListaDevolucionesHistorica.Add(Devoluc.CodigoReferencia);
+                                    using (StreamWriter sw = File.AppendText(rutadevolucionesprocesadas))
+                                    {
+                                        sw.Write(Devoluc.CodigoReferencia + "\r\n");
+                                    }
+
+                                }
+                                else
+                                {
+                                    ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - La devolucion del pedido " + Devoluc.CodigoReferencia + " ya fue procesado con anterioridad");
+                                }
                             }
                             else
                             {
-                                ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - La devolucion del pedido " + Devoluc.CodigoReferencia + " ya fue procesado con anterioridad");
+                                ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - El pedido informado con el codigo " + Devoluc.CodigoReferencia + " no se encuentra registrado en nuestra lista de pedidos enviado a logistica.");
                             }
                         }
                         else
@@ -178,6 +187,12 @@ namespace GRUPO1
 
                 }
             }
+        }
+
+        private bool VerificaDevolucion(string CodigoDePedido)
+        {
+            var pedido = EmpresaInstanciada.pedidos.Find(n => n.codigo == CodigoDePedido);
+            return pedido != null;
         }
 
         private bool VerificaStockDePedido(List<Elemento> lista)
