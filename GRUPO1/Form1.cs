@@ -59,7 +59,7 @@ namespace GRUPO1
                     if (RdnRecepcionPedido.Checked)
                     {
                         ProcesaPedido(txtRuta.Text);
-                        MessageBox.Show("El pedido fue procesado correctamente", "Informacion");
+                        
                     }
                     else if (rdnRecepcionStock.Checked)
                     {
@@ -119,7 +119,7 @@ namespace GRUPO1
 
                 }
             }
-
+            ListaDevoluciones = new List<Devolucion>();
             GrabarPedidosTxt();
             GrabarStockTxt();
             //ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - Se grabo el archivo pedidos");
@@ -164,6 +164,10 @@ namespace GRUPO1
                                     sw.Write(Devoluc.CodigoReferencia + "\r\n");
                                 }
 
+                            }
+                            else
+                            {
+                                ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - La devolucion del pedido " + Devoluc.CodigoReferencia + " ya fue procesado con anterioridad");
                             }
                         }
                         else
@@ -347,6 +351,7 @@ namespace GRUPO1
                     {
                         sw.Write(remueveExtension[0] + "\r\n");
                     }
+                    MessageBox.Show("El pedido fue procesado correctamente", "Informacion");
                 }
                 GrabarPedidosTxt();
 
@@ -474,7 +479,7 @@ namespace GRUPO1
                     ConfirmacionProcesado.SelectedIndex = ConfirmacionProcesado.Items.Count - 1;
                 }
             }
-            ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - Se grabo el archivo stock");
+            //ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - Se grabo el archivo stock");
             ConfirmacionProcesado.SelectedIndex = ConfirmacionProcesado.Items.Count - 1;
         }
         /// <summary>

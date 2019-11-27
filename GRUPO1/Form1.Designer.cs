@@ -178,7 +178,7 @@
             // 
             this.openFileDialog1.DefaultExt = "txt";
             this.openFileDialog1.FileName = "*.txt";
-            this.openFileDialog1.InitialDirectory = "C:";
+            this.openFileDialog1.InitialDirectory = "C:\\TP";
             // 
             // label1
             // 
