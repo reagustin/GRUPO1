@@ -410,7 +410,7 @@ namespace GRUPO1
         private void ProcesaStock(string Ruta) //////////// STOCK SE GRABA EN MEMORIA //////////////
         {
 
-
+            int numprod;
             List<Elemento> listaproduccion = new List<Elemento>();
             string[] lineas = null;
             Elemento Element;
@@ -420,30 +420,46 @@ namespace GRUPO1
                 lineas = File.ReadAllLines(Ruta);
                 string[] lineasplit = null;
 
-                foreach (string linea in lineas)
+                if (lineas.Any())
                 {
-                    if (linea != string.Empty)
+
+
+                    foreach (string linea in lineas)
                     {
-                        //aca empiezo a guardar cada contenido del array en el list de elementos acorde a mi stock (llamo a los objeto elemento, les pongo lo que corresponde
-                        // y luego es lo guardo en un metodo en la clase Empresa dentro de la lista Stock! voila
-                        Element = new Elemento();
-                        lineasplit = linea.Split(';');
-                        int cantidad = 0;
-                        if (
-                         (lineasplit.Count() == 2) &&
-                         (int.TryParse(lineasplit[1], out cantidad)))
-
+                        if (linea != string.Empty)
                         {
+                            //aca empiezo a guardar cada contenido del array en el list de elementos acorde a mi stock (llamo a los objeto elemento, les pongo lo que corresponde
+                            // y luego es lo guardo en un metodo en la clase Empresa dentro de la lista Stock! voila
+                            Element = new Elemento();
+                            lineasplit = linea.Split(';');
+                            int cantidad = 0;
+                            if (
+                             (lineasplit.Count() == 2) && lineasplit[0].Remove(1).ToUpper() == "P"
+                                                       && lineasplit[0].Remove(0, 1).Count() >= 1
+                                                       && lineasplit[0].Remove(0, 1).Count() < 6
+                                                       && int.TryParse(lineasplit[0].Remove(0, 1), out numprod)
+                                                       && numprod >= 0
+                                                       && (int.TryParse(lineasplit[1], out cantidad))
+                                                       && cantidad >= 0
+                                                       && cantidad < 100000)
 
-                            Element.prod.idprod = lineasplit[0];
-                            Element.cantidad = cantidad;
-                            listaproduccion.Add(Element);
+                            {
+
+                                Element.prod.idprod = lineasplit[0];
+                                Element.cantidad = cantidad;
+                                listaproduccion.Add(Element);
+                            }
+                            else
+                            {
+                                throw new Exception("Error en el formato del archivo enviado por Produccion, el proceso finalizo sin completarse");
+                            }
                         }
-                        else
-                        {
-                            throw new Exception("Error en el formato del archivo enviado por Produccion, el proceso finalizo sin completarse");
-                        }
+                        
                     }
+                }
+                else
+                {
+                    throw new Exception("El archivo esta vacio, el proceso finalizo sin completarse");
                 }
 
             }
