@@ -1,5 +1,9 @@
-# GRUPO1 
-# Ultima modificacion del 27-11-2019
+# GRUPO1
+
+# Ultima modificacion del 30-11-2019
+Se agrego validacion del formato a los ingresos de stock.
+
+# Modificacion del 27-11-2019
 Se corregieron algunos aspectos esteticos de mensajes y validaciones de negocio.
 
 # Modificacion 25-11-2019, se controla que todos los productos del pedido tengan stock, caso contrario el pedido no se procesa
