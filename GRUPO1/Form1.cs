@@ -1,4 +1,4 @@
-﻿// v9.2 27/11 9PM
+﻿// v9.4 3/12 9AM
 
 using System;
 using System.Collections.Generic;
@@ -61,7 +61,7 @@ namespace GRUPO1
                     if (RdnRecepcionPedido.Checked)
                     {
                         ProcesaPedido(txtRuta.Text);
-                        
+
                     }
                     else if (rdnRecepcionStock.Checked)
                     {
@@ -293,7 +293,8 @@ namespace GRUPO1
         /// <param name="Ruta"></param>
         private void ProcesaPedido(string Ruta)
         {
-
+            long numerocuit = 0;
+            int nrocodcli = 0;
             int nrolinea = 0;
             string[] lineas = null;
             string[] nombrepedidoruta = null;
@@ -310,6 +311,7 @@ namespace GRUPO1
                 }
                 else
                 {
+
                     lineas = File.ReadAllLines(Ruta);
                     string[] lineasplit = null;
                     foreach (string linea in lineas)
@@ -317,7 +319,15 @@ namespace GRUPO1
                         if (nrolinea == 0)
                         {
                             lineasplit = linea.Split(';');
-                            if (lineasplit.Count() == 4)
+                            if (lineasplit.Count() == 4 && !string.IsNullOrWhiteSpace(lineasplit[0]) && lineasplit[0].Remove(1).ToUpper() == "C"
+                                                        && int.TryParse(lineasplit[0].Remove(0, 1), out nrocodcli)
+                                                        && nrocodcli > 0
+                                                        && !string.IsNullOrWhiteSpace(lineasplit[1])
+                                                        && !string.IsNullOrWhiteSpace(lineasplit[2]) && lineasplit[2].IndexOf("-") == 2 && lineasplit[2].LastIndexOf("-") == 11
+                                                        && lineasplit[2].Replace("-", "").Count() == 11
+                                                        && Int64.TryParse(lineasplit[2].Replace("-", ""), out numerocuit)
+                                                        && numerocuit >= 0 && numerocuit <= 99999999999 // (Son 11 numeros 9) Int64 maximo valor: 9223372036854775807.													
+                                                        && !string.IsNullOrWhiteSpace(lineasplit[3]))
                             {
                                 pedidoComercio.codigo = remueveExtension[0];
                                 pedidoComercio.EnviadoLogistica = false;
@@ -329,17 +339,21 @@ namespace GRUPO1
                             }
                             else
                             {
-                                throw new Exception("Error en el formato del archivo de pedido, el proceso finalizo sin completarse");
+                                throw new Exception("Error en el formato del archivo de pedido en la cabecera, el proceso finalizo sin completarse");
                             }
                         }
                         else
                         {
+                            int numprod;
                             int cantidad = 0;
                             lineasplit = linea.Split(';');
-                            if (
-                                (lineasplit.Count() == 2) &&
-                                (int.TryParse(lineasplit[1], out cantidad)))
-
+                            if ((lineasplit.Count() == 2) && lineasplit[0].Remove(1).ToUpper() == "P"
+                                                          && lineasplit[0].Remove(0, 1).Count() >= 1
+                                                          && lineasplit[0].Remove(0, 1).Count() < 6
+                                                          && int.TryParse(lineasplit[0].Remove(0, 1), out numprod)
+                                                          && numprod >= 1
+                                                          && (int.TryParse(lineasplit[1], out cantidad))
+                                                          && cantidad > 0)
                             {
                                 Elemento ElementoEncontrado = (Elemento)EmpresaInstanciada.stock.Find(x => x.prod.idprod == lineasplit[0]);
                                 if (ElementoEncontrado != null)
@@ -422,7 +436,7 @@ namespace GRUPO1
 
                 if (lineas.Any())
                 {
-
+                    var okvalidaliena = true;
 
                     foreach (string linea in lineas)
                     {
@@ -433,35 +447,39 @@ namespace GRUPO1
                             Element = new Elemento();
                             lineasplit = linea.Split(';');
                             int cantidad = 0;
-                            if (
-                             (lineasplit.Count() == 2) && lineasplit[0].Remove(1).ToUpper() == "P"
-                                                       && lineasplit[0].Remove(0, 1).Count() >= 1
-                                                       && lineasplit[0].Remove(0, 1).Count() < 6
-                                                       && int.TryParse(lineasplit[0].Remove(0, 1), out numprod)
-                                                       && numprod >= 0
-                                                       && (int.TryParse(lineasplit[1], out cantidad))
-                                                       && cantidad >= 0
-                                                       && cantidad < 100000)
-
+                            if (!(lineasplit.Count() == 2) || !(lineasplit[0].Remove(1).ToUpper() == "P")
+                                                           || !(lineasplit[0].Remove(0, 1).Count() >= 1)
+                                                           || !(lineasplit[0].Remove(0, 1).Count() < 6)
+                                                           || !(int.TryParse(lineasplit[0].Remove(0, 1), out numprod))
+                                                           || !(numprod >= 1)
+                                                           || !(int.TryParse(lineasplit[1], out cantidad))
+                                                           || !(cantidad > 0)
+                                                           || !(cantidad < 100000))//Se puede mejorar este if como hice con "carga stock inicial".
                             {
-
-                                Element.prod.idprod = lineasplit[0];
-                                Element.cantidad = cantidad;
-                                listaproduccion.Add(Element);
-                            }
-                            else
-                            {
-                                throw new Exception("Error en el formato del archivo enviado por Produccion, el proceso finalizo sin completarse");
+                                okvalidaliena = false;
+                                throw new Exception("Error en el formato del archivo enviado por Produccion. El proceso finalizo sin cargar stock. Verifique las cantidades y el formato.");
                             }
                         }
-                        
+                    }//ACA TERMINA EL PRIMER FOREACH.
+                    if (okvalidaliena == true) //RECIEN ACA GUARDA EL STOCK.
+                    {
+                        foreach (string linea in lineas) //TOME EL ARRAY LINEAS (QUE TENIA LO DE LA RUTA) Y LO SEPARA EN LINEAS DE TIPO STRING. RECORRE TODAS. 
+                                                         //LO DE MAS ABAJO SIMPLEMENTE LO COPIE DEL DE ARRIBA SIN MODIFICAR, SALVO LA VARIABLE CANTIDAD. 
+                                                         //CANTIDAD SALIA DEL IF QUE VALIDAVABA, AHORA SALE DIRECTO DEL SPLIT CON UN INT.PARSE.
+                        {
+                            Element = new Elemento();
+                            lineasplit = linea.Split(';');
+
+                            Element.prod.idprod = lineasplit[0];
+                            Element.cantidad = int.Parse(lineasplit[1]);
+                            listaproduccion.Add(Element);
+                        }
                     }
-                }
+                }//TODO LO QUE SE AGREGO SE PROBO Y FUNCIONA. BORRA STOCK Y PROBALO POR LAS DUDAS (CARGA POR LO MENOS UNO BUENO Y UNO MALO).
                 else
                 {
                     throw new Exception("El archivo esta vacio, el proceso finalizo sin completarse");
                 }
-
             }
             //ConfirmacionProcesado.Items.Add(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString() + " - Se lee archivo de produccion");
 
@@ -522,7 +540,7 @@ namespace GRUPO1
             Elemento Element;
             if (File.Exists(rutaarchivo))
             {
-
+                var ok = true; //NUEVO.
                 lineas = File.ReadAllLines(rutaarchivo);
                 string[] lineasplit = null;
                 foreach (string linea in lineas)
@@ -530,25 +548,41 @@ namespace GRUPO1
                     if (linea != string.Empty)
                     {
                         int cantidad = 0;
-                        Element = new Elemento();
+                        int numprod;
+
                         lineasplit = linea.Split(';');
-                        if (
-                                (lineasplit.Count() == 2) &&
-                                (int.TryParse(lineasplit[1], out cantidad)))
-
+                        if (!(lineasplit.Count() == 2))
                         {
-                            Element.prod.idprod = lineasplit[0];
-                            Element.cantidad = cantidad;
-                            EmpresaInstanciada.GuardarStock(Element);
-                        }
-                        else
-                        {
+                            ok = false;
                             throw new Exception("Error en el formato del archivo de Stock. No se pudo procesar correctamente.");
-                        }
-
+                        }//NUEVO (MEJORADO).
+                        if (!(lineasplit[0].Remove(1).ToUpper() == "P") || !(lineasplit[0].Remove(0, 1).Count() >= 1)
+                                                                        || !(lineasplit[0].Remove(0, 1).Count() < 6)
+                                                                        || !(int.TryParse(lineasplit[0].Remove(0, 1), out numprod))
+                                                                        || !(numprod >= 1))
+                        {
+                            ok = false;
+                            throw new Exception("Error en el formato del codigo de producto (" + lineasplit[0] + ") cargado en stock.");
+                        }//NUEVO.
+                        if (!(int.TryParse(lineasplit[1], out cantidad)) || !(cantidad >= 0))
+                        {
+                            ok = false;
+                            throw new Exception("Error en la cantidad del producto " + lineasplit[0] + " de stock.");
+                        }//NUEVO.
                     }
-                }
+                }//Termina el FOREACH.
+                if (ok == true)
+                {
+                    foreach (string linea in lineas)
+                    {
+                        lineasplit = linea.Split(';');
+                        Element = new Elemento();
 
+                        Element.prod.idprod = lineasplit[0];
+                        Element.cantidad = int.Parse(lineasplit[1]);
+                        EmpresaInstanciada.GuardarStock(Element);
+                    }
+                }//ESTO ES NUEVO. Similar a la carga de Stock desde produccion.
             }
             else
             {
