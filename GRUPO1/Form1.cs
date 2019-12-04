@@ -319,7 +319,8 @@ namespace GRUPO1
                         if (nrolinea == 0)
                         {
                             lineasplit = linea.Split(';');
-                            if (lineasplit.Count() == 4 && !string.IsNullOrWhiteSpace(lineasplit[0]) && lineasplit[0].Remove(1).ToUpper() == "C"
+                            if (lineasplit.Count() == 4 && !string.IsNullOrWhiteSpace(lineasplit[0]) 
+                                                        && lineasplit[0].Count()>=2 && lineasplit[0].Remove(1).ToUpper() == "C" //v9.5
                                                         && int.TryParse(lineasplit[0].Remove(0, 1), out nrocodcli)
                                                         && nrocodcli > 0
                                                         && !string.IsNullOrWhiteSpace(lineasplit[1])
@@ -347,7 +348,8 @@ namespace GRUPO1
                             int numprod;
                             int cantidad = 0;
                             lineasplit = linea.Split(';');
-                            if ((lineasplit.Count() == 2) && lineasplit[0].Remove(1).ToUpper() == "P"
+                            if ((lineasplit.Count() == 2) && lineasplit[0].Count() >= 2 //v9.5
+                                                          && lineasplit[0].Remove(1).ToUpper() == "P"
                                                           && lineasplit[0].Remove(0, 1).Count() >= 1
                                                           && lineasplit[0].Remove(0, 1).Count() < 6
                                                           && int.TryParse(lineasplit[0].Remove(0, 1), out numprod)
@@ -447,7 +449,8 @@ namespace GRUPO1
                             Element = new Elemento();
                             lineasplit = linea.Split(';');
                             int cantidad = 0;
-                            if (!(lineasplit.Count() == 2) || !(lineasplit[0].Remove(1).ToUpper() == "P")
+                            if (!(lineasplit.Count() == 2) || !(lineasplit[0].Count() >= 2) // v9.5
+                                                           || !(lineasplit[0].Remove(1).ToUpper() == "P")
                                                            || !(lineasplit[0].Remove(0, 1).Count() >= 1)
                                                            || !(lineasplit[0].Remove(0, 1).Count() < 6)
                                                            || !(int.TryParse(lineasplit[0].Remove(0, 1), out numprod))
@@ -556,10 +559,11 @@ namespace GRUPO1
                             ok = false;
                             throw new Exception("Error en el formato del archivo de Stock. No se pudo procesar correctamente.");
                         }//NUEVO (MEJORADO).
-                        if (!(lineasplit[0].Remove(1).ToUpper() == "P") || !(lineasplit[0].Remove(0, 1).Count() >= 1)
-                                                                        || !(lineasplit[0].Remove(0, 1).Count() < 6)
-                                                                        || !(int.TryParse(lineasplit[0].Remove(0, 1), out numprod))
-                                                                        || !(numprod >= 1))
+                        if (!(lineasplit[0].Count() >= 2) || !(lineasplit[0].Remove(1).ToUpper() == "P") // v9.5
+                                                          || !(lineasplit[0].Remove(0, 1).Count() >= 1)
+                                                          || !(lineasplit[0].Remove(0, 1).Count() < 6)
+                                                          || !(int.TryParse(lineasplit[0].Remove(0, 1), out numprod))
+                                                          || !(numprod >= 1))
                         {
                             ok = false;
                             throw new Exception("Error en el formato del codigo de producto (" + lineasplit[0] + ") cargado en stock.");
